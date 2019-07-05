@@ -1,0 +1,21 @@
+{
+  "name": "rtc-live-show",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "hughfenghen",
+  "license": "MIT",
+  "scripts": {
+    "client": "parcel src/*.html",
+    "server": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "rrweb": "^0.7.17",
+    "rrweb-player": "^0.3.14",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1",
+    "parcel-bundler": "^1.12.3"
+  }
+}
