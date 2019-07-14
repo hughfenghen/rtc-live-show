@@ -1,9 +1,11 @@
 import io from 'socket.io-client';
 import RRWebPlayer from 'rrweb-player';
 import 'rrweb-player/dist/style.css';
+import genUUID from 'uuid';
 
 const socket = io('http://localhost:4622');
 const rtcPC = new RTCPeerConnection(null);
+const token = genUUID()
 
 const onlineUserEl = document.querySelector('.online-user')
 onlineUserEl.addEventListener('click', onConnectUser)
@@ -26,6 +28,7 @@ sendChannel.onopen = () => {
 let buffer = new Uint8Array();
 sendChannel.onmessage = evt => {
   const msg = new Uint8Array(evt.data);
+  // 如果数据包太大，超过单次上限，需要组装数据包
   const isComplete = !!msg[0];
   const content = msg.slice(1);
   buffer = concatArrayBuffer(buffer, content);
@@ -64,14 +67,14 @@ async function onConnectUser(evt) {
   const offer = await rtcPC.createOffer();
   rtcPC.setLocalDescription(offer);
   console.log('------ send offer to ', that.curUserId, offer);
-  socket.emit('send-offer', that.curUserId, offer, answer => {
+  socket.emit('send-offer', that.curUserId, { offer, token }, answer => {
     console.log('------ received answer: ', answer);
     rtcPC.setRemoteDescription(new RTCSessionDescription(answer));
   });
 }
 function sendCandidate(candidate) {
   if (that.curUserId) {
-    socket.emit('send-ice-candidate', that.curUserId, candidate);
+    socket.emit('send-ice-candidate', that.curUserId, { candidate, token });
     return;
   }
   console.log('curUserId is null');
