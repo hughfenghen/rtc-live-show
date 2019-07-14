@@ -1,6 +1,7 @@
 {
   "name": "rtc-live-show",
   "version": "1.0.0",
+  "description": "基于WEB RTC + rrwe实现的页面“直播”demo",
   "main": "index.js",
   "author": "hughfenghen",
   "license": "MIT",
