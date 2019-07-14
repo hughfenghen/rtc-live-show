@@ -5,9 +5,12 @@ import 'rrweb-player/dist/style.css';
 const socket = io('http://localhost:4622');
 const rtcPC = new RTCPeerConnection(null);
 
+const onlineUserEl = document.querySelector('.online-user')
+onlineUserEl.addEventListener('click', onConnectUser)
+
 socket.emit('getOnlineUsers', userIds => {
   console.log('---- online users', userIds);
-  onlineUsers = userIds;
+  onlineUserEl.innerHTML = userIds
 });
 rtcPC.onicecandidate = ({ candidate }) => {
   console.log('------ send candiate to ', candidate);
@@ -38,35 +41,52 @@ sendChannel.onmessage = evt => {
   }
 };
 
+const that = {
+  rrwebEvts: [],
+}
 function addEvent(evt) {
-  if (!this.player) {
-    this.rrwebEvts.push(evt);
-    if (this.rrwebEvts.length >= 2) {
-      this.player = new RRWebPlayer({
-        target: this.$refs.scene,
+  if (!that.player) {
+    that.rrwebEvts.push(evt);
+    if (that.rrwebEvts.length >= 2) {
+      that.player = new RRWebPlayer({
+        target: document.querySelector('.scene'),
         data: {
-          events: this.rrwebEvts.slice(0),
+          events: that.rrwebEvts.slice(0),
         },
       });
     }
   } else {
-    this.player.addEvent(evt);
+    that.player.addEvent(evt);
   }
 }
-async function onConnectUser(userId) {
-  this.curUserId = userId;
-  const offer = await this.rtcPC.createOffer();
-  this.rtcPC.setLocalDescription(offer);
-  console.log('------ send offer to ', userId, offer);
-  this.socket.emit('send-offer', userId, offer, answer => {
+async function onConnectUser(evt) {
+  that.curUserId = evt.target.innerText;
+  const offer = await rtcPC.createOffer();
+  rtcPC.setLocalDescription(offer);
+  console.log('------ send offer to ', that.curUserId, offer);
+  socket.emit('send-offer', that.curUserId, offer, answer => {
     console.log('------ received answer: ', answer);
-    this.rtcPC.setRemoteDescription(new RTCSessionDescription(answer));
+    rtcPC.setRemoteDescription(new RTCSessionDescription(answer));
   });
 }
 function sendCandidate(candidate) {
-  if (this.curUserId) {
-    this.socket.emit('send-ice-candidate', this.curUserId, candidate);
+  if (that.curUserId) {
+    socket.emit('send-ice-candidate', that.curUserId, candidate);
     return;
   }
   console.log('curUserId is null');
+}
+
+function concatArrayBuffer(...arrays) {
+  let totalLength = 0;
+  for (let arr of arrays) {
+    totalLength += arr.length;
+  }
+  let result = new arrays[0].constructor(totalLength);
+  let offset = 0;
+  for (let arr of arrays) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+  return result;
 }

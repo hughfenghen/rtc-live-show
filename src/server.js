@@ -13,6 +13,7 @@ io.on('connection', socket => {
   });
 
   socket.on('user-regisiter', id => {
+    console.log(44444, socket);
     onlineUser[id] = { socket };
   });
   socket.on('getOnlineUsers', send => {
@@ -20,6 +21,7 @@ io.on('connection', socket => {
   });
 
   socket.on('send-offer', (userId, offer, respAnswer) => {
+    console.log(55555, onlineUser, userId);
     onlineUser[userId].socket.emit('rtc-offer', offer, answer => {
       respAnswer(answer);
     });
