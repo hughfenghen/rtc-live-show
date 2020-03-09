@@ -1,4 +1,4 @@
-# 基于WEB RTC + rrwe实现的页面“直播”demo
+# 基于WEB RTC + rrweb实现的页面“直播”demo
 
 ## 启动方法
 1. 安装依赖：`yarn install`
